@@ -1,0 +1,151 @@
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root{
+  --ui-font: 'Inter', 'Roboto', sans-serif;
+  --code-font: 'Fira Code', 'JetBrains Mono', monospace;
+}
+
+body{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  background-color: #18181b;
+  color: #fff;
+  font-family: var(--ui-font);
+  overflow-x: hidden;
+}
+
+/* Button aesthetics */
+.btn{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  font-weight: 600;
+  letter-spacing: .2px;
+  transition: transform .08s ease, box-shadow .2s ease, background .2s ease, border-color .2s ease;
+  cursor: pointer;
+  user-select: none;
+}
+.btn:active{
+  transform: translateY(1px);
+}
+.btn-success{
+  color: #0b1f12;
+  background: linear-gradient(180deg, #35d07f, #2ECC71);
+  border-color: #1f8e54;
+  box-shadow: 0 6px 14px rgba(46, 204, 113, .25);
+}
+.btn-success:hover{ background: linear-gradient(180deg, #49dc8f, #39d982); }
+
+.btn-primary{
+  color: #0b1623;
+  background: linear-gradient(180deg, #58a9ea, #3498DB);
+  border-color: #2b75a8;
+  box-shadow: 0 6px 14px rgba(52, 152, 219, .25);
+}
+.btn-primary:hover{ background: linear-gradient(180deg, #73b7ef, #4aa5e6); }
+
+.btn-neutral{
+  color: #0d0f10;
+  background: linear-gradient(180deg, #b8c2c3, #95A5A6);
+  border-color: #7d8a8b;
+  box-shadow: 0 6px 14px rgba(149,165,166, .25);
+}
+.btn-neutral:hover{ background: linear-gradient(180deg, #c6cfd0, #aeb7b8); }
+
+.btn-ghost{
+  background: transparent;
+  color: #C5C5C5;
+  border: 1px solid #2D2D2D;
+}
+.btn-ghost:hover{ border-color: #3a3a3a; }
+
+/* Toolbar subtle background */
+.toolbar{
+  background: linear-gradient(180deg, #2b2b2b, #262626);
+}
+
+.css-b62m3t-container{
+  width: 65%;
+}
+
+.css-1mi3hag-control{
+  width: 100%;
+}
+
+.css-sl4pg4-control{
+  width: 30% !important;
+}
+
+.btnNormal{
+  padding: 10px;
+  color: #fff;
+  border-radius: 10px;
+  border: 0;
+  outline: 0;
+  cursor: pointer;
+}
+
+p{
+  margin-top: 10px !important;
+  margin-bottom: 10px !important;
+  color: gray;
+}
+
+p > strong{
+  font-size: 20px !important;
+  color: #fff;
+}
+
+ul li{
+  color: gray;
+  margin-top: 10px !important;
+  margin-bottom: 10px !important;
+  list-style: circle !important;
+}
+
+li strong {
+  color: #fff;
+}
+
+pre{
+  background-color: #121214 !important;
+  padding: 10px;
+  color: #fff;
+  overflow: auto;
+  font-family: var(--code-font);
+}
+
+pre::-webkit-scrollbar{
+ display: none;
+}
+
+/* width */
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #030303;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #212121;
+}
+
+/* Code Editor Styles */
+.code-editor pre {
+  background: transparent !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  font-family: var(--code-font);
+}
