@@ -546,7 +546,7 @@ Improved code:`,
           className="right flex flex-col"
           style={{
             width: `${100 - leftWidthPct}%`,
-            backgroundColor: palette.bgPanel,
+            backgroundColor: '#000000',
             border: `1px solid ${palette.divider}`,
             borderRadius: '12px',
             overflow: 'hidden',
@@ -572,8 +572,8 @@ Improved code:`,
             )}
 
             {reviewData && !loading && (
-              <div className="space-y-5">
-                <div className="rounded-xl p-4 shadow-md" style={{ backgroundColor: '#000000', border: `1px solid ${palette.divider}`, fontFamily: 'var(--ui-font)' }}>
+              <div className="space-y-8">
+                <div className="rounded-xl p-4 shadow-md" style={{ backgroundColor: '#202020', border: `1px solid ${palette.divider}`, fontFamily: 'var(--ui-font)' }}>
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#2B2B2B' }}>
@@ -581,14 +581,13 @@ Improved code:`,
                       </div>
                       <h3 className="font-semibold" style={{ color: palette.textPrimary, fontFamily: 'var(--ui-font)', fontWeight: 600 }}>Quality Rating</h3>
                     </div>
-                    <button onClick={() => toggleCard('quality')} className="text-sm" style={{ color: palette.textMuted }}>{collapsed.quality ? 'Expand' : 'Collapse'}</button>
                   </div>
                   {!collapsed.quality && (
                     <p className="font-medium" style={{ color: palette.run, fontFamily: 'var(--ui-font)', fontWeight: 600 }}>{reviewData.qualityRating}</p>
                   )}
                 </div>
 
-                <div className="rounded-xl p-4 shadow-md" style={{ backgroundColor: '#000000', border: `1px solid ${palette.divider}`, fontFamily: 'var(--ui-font)' }}>
+                <div className="rounded-xl p-4 shadow-md" style={{ backgroundColor: '#202020', border: `1px solid ${palette.divider}`, fontFamily: 'var(--ui-font)' }}>
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#2B2B2B' }}>
@@ -596,7 +595,6 @@ Improved code:`,
                       </div>
                       <h3 className="font-semibold" style={{ color: palette.textPrimary, fontFamily: 'var(--ui-font)', fontWeight: 600 }}>Suggestions</h3>
                     </div>
-                    <button onClick={() => toggleCard('suggestions')} className="text-sm" style={{ color: palette.textMuted }}>{collapsed.suggestions ? 'Expand' : 'Collapse'}</button>
                   </div>
                   {!collapsed.suggestions && (
                     <ul className="space-y-3">
@@ -624,7 +622,7 @@ Improved code:`,
                   )}
                 </div>
 
-                <div className="rounded-xl p-4 shadow-md" style={{ backgroundColor: '#000000', border: `1px solid ${palette.divider}`, fontFamily: 'var(--ui-font)' }}>
+                <div className="rounded-xl p-4 shadow-md" style={{ backgroundColor: '#202020', border: `1px solid ${palette.divider}`, fontFamily: 'var(--ui-font)' }}>
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#2B2B2B' }}>
@@ -632,7 +630,6 @@ Improved code:`,
                       </div>
                       <h3 className="font-semibold" style={{ color: palette.textPrimary, fontFamily: 'var(--ui-font)', fontWeight: 600 }}>Step-by-Step Explanation</h3>
                     </div>
-                    <button onClick={() => toggleCard('explanation')} className="text-sm" style={{ color: palette.textMuted }}>{collapsed.explanation ? 'Expand' : 'Collapse'}</button>
                   </div>
                   {!collapsed.explanation && (
                     <p className="text-sm" style={{ color: palette.textSecondary, fontFamily: 'var(--ui-font)', fontWeight: 400 }}>
@@ -641,7 +638,7 @@ Improved code:`,
                   )}
                 </div>
 
-                <div className="rounded-xl p-4 shadow-md" style={{ backgroundColor: '#000000', border: `1px solid ${palette.divider}`, fontFamily: 'var(--ui-font)' }}>
+                <div className="rounded-xl p-4 shadow-md" style={{ backgroundColor: '#202020', border: `1px solid ${palette.divider}`, fontFamily: 'var(--ui-font)' }}>
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#2B2B2B' }}>
@@ -649,7 +646,6 @@ Improved code:`,
                       </div>
                       <h3 className="font-semibold" style={{ color: palette.textPrimary, fontFamily: 'var(--ui-font)', fontWeight: 600 }}>Errors</h3>
                     </div>
-                    <button onClick={() => toggleCard('errors')} className="text-sm" style={{ color: palette.textMuted }}>{collapsed.errors ? 'Expand' : 'Collapse'}</button>
                   </div>
                   {!collapsed.errors && (
                     Array.isArray(reviewData.errors) ? (
@@ -665,7 +661,7 @@ Improved code:`,
                 </div>
 
                 {reviewData.improvements && (
-                  <div className="rounded-xl p-4 shadow-md" style={{ backgroundColor: '#000000', border: `1px solid ${palette.divider}`, fontFamily: 'var(--ui-font)' }}>
+                  <div className="rounded-xl p-4 shadow-md" style={{ backgroundColor: '#202020', border: `1px solid ${palette.divider}`, fontFamily: 'var(--ui-font)' }}>
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#2B2B2B' }}>
@@ -673,7 +669,6 @@ Improved code:`,
                         </div>
                         <h3 className="font-semibold" style={{ color: palette.textPrimary, fontFamily: 'var(--ui-font)', fontWeight: 600 }}>Improvements</h3>
                       </div>
-                      <button onClick={() => toggleCard('improvements')} className="text-sm" style={{ color: palette.textMuted }}>{collapsed.improvements ? 'Expand' : 'Collapse'}</button>
                     </div>
                     {!collapsed.improvements && (
                       <ul className="space-y-2">
@@ -698,7 +693,7 @@ Improved code:`,
             )}
 
             {/* Chat with Reviewer */}
-            <div className="rounded-xl p-4 shadow-md mt-5" style={{ backgroundColor: '#2b2b2b', border: `1px solid ${palette.divider}`, fontFamily: 'var(--ui-font)' }}>
+            <div className="rounded-xl p-4 shadow-md mt-6" style={{ backgroundColor: '#2b2b2b', border: `1px solid ${palette.divider}`, fontFamily: 'var(--ui-font)' }}>
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-semibold" style={{ color: palette.textPrimary }}>Chat with Reviewer</h3>
               </div>
