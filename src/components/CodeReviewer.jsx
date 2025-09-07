@@ -406,7 +406,7 @@ Improved code:`,
       className="main"
       style={{
         height: "calc(100vh - 90px)",
-        backgroundColor: palette.bgMain,
+        backgroundColor: '#1E1E1E',
         padding: '16px',
       }}
       ref={containerRef}
@@ -425,7 +425,7 @@ Improved code:`,
           }}
         >
           {/* Header with grouped buttons and history */}
-          <div className="flex items-center justify-between p-4" style={{ borderBottom: `1px solid ${palette.divider}` }}>
+          <div className="flex items-center justify-between p-4 toolbar" style={{ borderBottom: `1px solid ${palette.divider}` }}>
             <div className="flex items-center gap-3">
               <div className="flex items-center" style={{ gap: '8px' }}>
                 <button 
@@ -579,11 +579,11 @@ Improved code:`,
                       <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#2B2B2B' }}>
                         <CheckCircle size={16} color={palette.run} />
                       </div>
-                      <h3 className="font-semibold" style={{ color: palette.textPrimary, fontFamily: 'var(--ui-font)', fontWeight: 600 }}>Quality Rating</h3>
+                      <h3 className="font-semibold" style={{ color: palette.textPrimary, fontFamily: 'var(--ui-font)', fontWeight: 600, marginLeft: 8 }}>Quality Rating</h3>
                     </div>
                   </div>
                   {!collapsed.quality && (
-                    <p className="font-medium" style={{ color: palette.run, fontFamily: 'var(--ui-font)', fontWeight: 600 }}>{reviewData.qualityRating}</p>
+                    <p className="font-medium text-sm" style={{ color: palette.run, fontFamily: 'var(--ui-font)', fontWeight: 600, marginLeft: 8 }}>{reviewData.qualityRating}</p>
                   )}
                 </div>
 
@@ -593,7 +593,7 @@ Improved code:`,
                       <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#2B2B2B' }}>
                         <Lightbulb size={16} color={palette.bulb} />
                       </div>
-                      <h3 className="font-semibold" style={{ color: palette.textPrimary, fontFamily: 'var(--ui-font)', fontWeight: 600 }}>Suggestions</h3>
+                      <h3 className="font-semibold" style={{ color: palette.textPrimary, fontFamily: 'var(--ui-font)', fontWeight: 600, marginLeft: 8 }}>Suggestions</h3>
                     </div>
                   </div>
                   {!collapsed.suggestions && (
@@ -601,7 +601,7 @@ Improved code:`,
                       {reviewData.suggestions?.map((suggestion, index) => {
                         const blocks = extractCodeBlocks(suggestion);
                         return (
-                          <li key={index} className="text-sm" style={{ color: palette.textSecondary, fontFamily: 'var(--ui-font)', fontWeight: 400 }}>
+                          <li key={index} className="text-sm" style={{ color: palette.textSecondary, fontFamily: 'var(--ui-font)', fontWeight: 600, marginLeft: 8 }}>
                             <div className="mb-2">• {suggestion.replace(/```[\s\S]*?```/g, '').trim()}</div>
                             {blocks.map((b, bi) => (
                               <div key={bi} className="rounded-md" style={{ background: '#1f1f1f', border: `1px solid ${palette.divider}` }}>
@@ -612,7 +612,7 @@ Improved code:`,
                                     <button className="text-xs px-2 py-1 rounded-md" style={{ background: palette.fix, color: '#fff', fontFamily: 'var(--ui-font)' }} onClick={() => applyFixBlock(b)}>Apply Fix</button>
                                   </div>
                                 </div>
-                                <pre className="p-3 text-xs overflow-auto" style={{ color: palette.textSecondary, margin: 0, fontFamily: 'var(--code-font)', fontWeight: 400 }}><code>{b}</code></pre>
+                                <pre className="p-3 text-xs overflow-auto" style={{ color: palette.textSecondary, margin: 0, fontFamily: 'var(--code-font)', fontWeight: 600 }}><code>{b}</code></pre>
                               </div>
                             ))}
                           </li>
@@ -628,11 +628,11 @@ Improved code:`,
                       <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#2B2B2B' }}>
                         <BookOpen size={16} color={'#4A90E2'} />
                       </div>
-                      <h3 className="font-semibold" style={{ color: palette.textPrimary, fontFamily: 'var(--ui-font)', fontWeight: 600 }}>Step-by-Step Explanation</h3>
+                      <h3 className="font-semibold" style={{ color: palette.textPrimary, fontFamily: 'var(--ui-font)', fontWeight: 600, marginLeft: 8 }}>Step-by-Step Explanation</h3>
                     </div>
                   </div>
                   {!collapsed.explanation && (
-                    <p className="text-sm" style={{ color: palette.textSecondary, fontFamily: 'var(--ui-font)', fontWeight: 400 }}>
+                    <p className="text-sm" style={{ color: palette.textSecondary, fontFamily: 'var(--ui-font)', fontWeight: 600, marginLeft: 8 }}>
                       {reviewData.explanation}
                     </p>
                   )}
@@ -644,18 +644,18 @@ Improved code:`,
                       <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#2B2B2B' }}>
                         <AlertTriangle size={16} color={palette.error} />
                       </div>
-                      <h3 className="font-semibold" style={{ color: palette.textPrimary, fontFamily: 'var(--ui-font)', fontWeight: 600 }}>Errors</h3>
+                      <h3 className="font-semibold" style={{ color: palette.textPrimary, fontFamily: 'var(--ui-font)', fontWeight: 600, marginLeft: 8 }}>Errors</h3>
                     </div>
                   </div>
                   {!collapsed.errors && (
                     Array.isArray(reviewData.errors) ? (
                       <ul className="space-y-2">
                         {reviewData.errors.map((error, index) => (
-                          <li key={index} className="text-sm" style={{ color: palette.textSecondary, fontFamily: 'var(--ui-font)', fontWeight: 400 }}>• {error}</li>
+                          <li key={index} className="text-sm" style={{ color: palette.textSecondary, fontFamily: 'var(--ui-font)', fontWeight: 600, marginLeft: 8 }}>• {error}</li>
                         ))}
                       </ul>
                     ) : (
-                      <p className="text-sm" style={{ color: palette.textSecondary, fontFamily: 'var(--ui-font)', fontWeight: 400 }}>{reviewData.errors}</p>
+                      <p className="text-sm" style={{ color: palette.textSecondary, fontFamily: 'var(--ui-font)', fontWeight: 600, marginLeft: 8 }}>{reviewData.errors}</p>
                     )
                   )}
                 </div>
@@ -667,13 +667,13 @@ Improved code:`,
                         <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#2B2B2B' }}>
                           <List size={16} color={'#2ECC71'} />
                         </div>
-                        <h3 className="font-semibold" style={{ color: palette.textPrimary, fontFamily: 'var(--ui-font)', fontWeight: 600 }}>Improvements</h3>
+                        <h3 className="font-semibold" style={{ color: palette.textPrimary, fontFamily: 'var(--ui-font)', fontWeight: 600, marginLeft: 8 }}>Improvements</h3>
                       </div>
                     </div>
                     {!collapsed.improvements && (
                       <ul className="space-y-2">
                         {reviewData.improvements.map((improvement, index) => (
-                          <li key={index} className="text-sm" style={{ color: palette.textSecondary, fontFamily: 'var(--ui-font)', fontWeight: 400 }}>• {improvement}</li>
+                          <li key={index} className="text-sm" style={{ color: palette.textSecondary, fontFamily: 'var(--ui-font)', fontWeight: 600, marginLeft: 8 }}>• {improvement}</li>
                         ))}
                       </ul>
                     )}
