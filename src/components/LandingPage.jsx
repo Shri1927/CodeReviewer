@@ -1,26 +1,32 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BrainCircuit, Code, CheckCircle, Zap, ArrowRight, Shield, Lightbulb, AlertTriangle } from 'lucide-react';
+import { BrainCircuit, Code, ArrowRight, Copy, NotebookPen, Wrench, CheckCircle2 } from 'lucide-react';
 
 const LandingPage = () => {
   const navigate = useNavigate();
 
   const handleExploreClick = () => {
-    console.log('Explore button clicked!'); // Debug log
     navigate('/editor');
   };
+
+  const codeSample = `function sum(a, b) {\n  return a + b;\n}\n\nconsole.log(sum(10, 20));`;
+
+  function copySample() {
+    navigator.clipboard.writeText(codeSample);
+  }
 
   return (
     <div style={{
       minHeight: '100vh',
-      backgroundColor: '#18181b',
+      background: 'radial-gradient(60% 100% at 10% 10%, rgba(147,51,234,.25) 0%, rgba(59,130,246,.12) 35%, rgba(30,30,30,1) 70%)',
+      backgroundColor: '#1E1E1E',
       color: '#ffffff',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+      fontFamily: 'var(--ui-font)'
     }}>
       {/* Header */}
       <header style={{
-        backgroundColor: '#18181b',
-        borderBottom: '1px solid #27272a',
+        background: 'transparent',
+        borderBottom: '1px solid rgba(255,255,255,.06)',
         padding: '16px 0'
       }}>
         <div style={{
@@ -32,516 +38,121 @@ const LandingPage = () => {
           gap: '12px'
         }}>
           <BrainCircuit size={32} color='#9333ea'/>
-          <span style={{
-            fontSize: '24px',
-            fontWeight: 'bold',
-            color: '#ffffff'
-          }}>Codeify</span>
+          <span style={{ fontSize: '24px', fontWeight: 'bold' }}>Codeify</span>
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section style={{
-        padding: '80px 0',
-        textAlign: 'center'
-      }}>
-        <div style={{
-          maxWidth: '1000px',
-          margin: '0 auto',
-          padding: '0 24px'
-        }}>
-          <h1 style={{
-            fontSize: 'clamp(2.5rem, 5vw, 4rem)',
-            fontWeight: 'bold',
-            color: '#ffffff',
-            marginBottom: '24px',
-            lineHeight: '1.2'
-          }}>
-            <span style={{ color: '#ffffff' }}>AI-Powered</span>
-            <br />
-            <span style={{
-              background: 'linear-gradient(135deg, #9333ea, #3b82f6)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text'
-            }}>Code Review</span>
-          </h1>
-          
-          <p style={{
-            fontSize: '20px',
-            color: '#a1a1aa',
-            marginBottom: '48px',
-            maxWidth: '600px',
-            margin: '0 auto 48px auto',
-            lineHeight: '1.6'
-          }}>
-            Get instant, expert-level code reviews powered by advanced AI. 
-            Improve your code quality, catch bugs early, and learn best practices.
-          </p>
-          
-          <button 
-            onClick={handleExploreClick}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '12px',
-              backgroundColor: '#9333ea',
-              color: '#ffffff',
-              border: 'none',
-              borderRadius: '8px',
-              padding: '16px 32px',
-              fontSize: '18px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              transition: 'all 0.3s ease',
-              transform: 'scale(1)',
-              boxShadow: '0 4px 14px rgba(147, 51, 234, 0.3)'
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.backgroundColor = '#7c3aed';
-              e.target.style.transform = 'scale(1.05)';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.backgroundColor = '#9333ea';
-              e.target.style.transform = 'scale(1)';
-            }}
-          >
-            <Code size={24} />
-            Explore Code Editor
-            <ArrowRight size={20} />
-          </button>
-        </div>
-      </section>
-
-      {/* Why Choose Codeify Section */}
-      <section style={{
-        padding: '80px 0',
-        backgroundColor: 'rgba(39, 39, 42, 0.3)'
-      }}>
-        <div style={{
-          maxWidth: '1200px',
-          margin: '0 auto',
-          padding: '0 24px'
-        }}>
-          <div style={{ textAlign: 'center', marginBottom: '64px' }}>
-            <h2 style={{
-              fontSize: '36px',
-              fontWeight: 'bold',
-              color: '#ffffff',
-              marginBottom: '16px'
-            }}>Why Choose Codeify?</h2>
-            <p style={{
-              fontSize: '20px',
-              color: '#a1a1aa'
-            }}>Advanced AI technology meets developer expertise</p>
+      {/* Hero */}
+      <section style={{ padding: '90px 0 40px 0' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px', display: 'grid', gridTemplateColumns: '1.1fr .9fr', gap: '32px' }}>
+          <div>
+            <h1 style={{ fontSize: 'clamp(2.6rem, 5vw, 3.8rem)', lineHeight: 1.15, marginBottom: 16 }}>
+              <span style={{ color: '#fff' }}>AI Code Review</span>
+              <br/>
+              <span style={{
+                background: 'linear-gradient(135deg, #a855f7, #60a5fa)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent'
+              }}>Built for Developers</span>
+            </h1>
+            <p style={{ color: '#C5C5C5', fontSize: 18, maxWidth: 620, marginBottom: 28 }}>Ship better code with instant, high‑quality reviews, rich explanations, and actionable fixes—right when you need them.</p>
+            <div style={{ display: 'flex', gap: 12 }}>
+              <button onClick={handleExploreClick} className="btn btn-primary">
+                <Code size={18} /> Open Editor <ArrowRight size={16} />
+              </button>
+              <a href="#preview" className="btn btn-ghost" style={{ textDecoration: 'none' }}>See Preview</a>
+            </div>
           </div>
-          
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-            gap: '32px',
-            maxWidth: '1000px',
-            margin: '0 auto'
+
+          {/* Code preview block */}
+          <div id="preview" style={{
+            background: 'linear-gradient(180deg, rgba(0,0,0,.7), rgba(0,0,0,.4))',
+            border: '1px solid rgba(255,255,255,.08)',
+            borderRadius: 14,
+            overflow: 'hidden',
+            boxShadow: '0 20px 50px rgba(0,0,0,.35)'
           }}>
-            {/* Lightning Fast */}
-            <div style={{
-              backgroundColor: '#27272a',
-              borderRadius: '12px',
-              padding: '32px',
-              border: '1px solid #3f3f46',
-              transition: 'all 0.3s ease',
-              cursor: 'pointer'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = '#9333ea';
-              e.currentTarget.style.transform = 'translateY(-5px)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = '#3f3f46';
-              e.currentTarget.style.transform = 'translateY(0)';
-            }}>
-              <div style={{
-                width: '64px',
-                height: '64px',
-                backgroundColor: '#9333ea',
-                borderRadius: '12px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: '24px'
-              }}>
-                <Zap size={32} color="#ffffff" />
-              </div>
-              <h3 style={{
-                fontSize: '24px',
-                fontWeight: 'bold',
-                color: '#ffffff',
-                marginBottom: '16px'
-              }}>Lightning Fast</h3>
-              <p style={{
-                color: '#a1a1aa',
-                lineHeight: '1.6'
-              }}>
-                Get comprehensive code reviews in seconds, not hours. Our AI analyzes your code instantly and provides detailed feedback.
-              </p>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', borderBottom: '1px solid rgba(255,255,255,.06)', background: 'rgba(0,0,0,.35)' }}>
+              <span style={{ color: '#a1a1aa', fontSize: 12 }}>example.js</span>
+              <button onClick={copySample} title="Copy" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,.06)', color: '#fff', border: '1px solid rgba(255,255,255,.12)', borderRadius: 8, padding: '6px 8px', cursor: 'pointer' }}>
+                <Copy size={14} /> Copy
+              </button>
             </div>
-
-            {/* Expert Quality */}
-            <div style={{
-              backgroundColor: '#27272a',
-              borderRadius: '12px',
-              padding: '32px',
-              border: '1px solid #3f3f46',
-              transition: 'all 0.3s ease',
-              cursor: 'pointer'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = '#3b82f6';
-              e.currentTarget.style.transform = 'translateY(-5px)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = '#3f3f46';
-              e.currentTarget.style.transform = 'translateY(0)';
-            }}>
-              <div style={{
-                width: '64px',
-                height: '64px',
-                backgroundColor: '#3b82f6',
-                borderRadius: '12px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: '24px'
-              }}>
-                <CheckCircle size={32} color="#ffffff" />
-              </div>
-              <h3 style={{
-                fontSize: '24px',
-                fontWeight: 'bold',
-                color: '#ffffff',
-                marginBottom: '16px'
-              }}>Expert Quality</h3>
-              <p style={{
-                color: '#a1a1aa',
-                lineHeight: '1.6'
-              }}>
-                Receive reviews that match the quality of senior developers. Catch bugs, improve performance, and learn best practices.
-              </p>
-            </div>
-
-            {/* Secure & Private */}
-            <div style={{
-              backgroundColor: '#27272a',
-              borderRadius: '12px',
-              padding: '32px',
-              border: '1px solid #10b981',
-              transition: 'all 0.3s ease',
-              cursor: 'pointer'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = '#059669';
-              e.currentTarget.style.transform = 'translateY(-5px)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = '#10b981';
-              e.currentTarget.style.transform = 'translateY(0)';
-            }}>
-              <div style={{
-                width: '64px',
-                height: '64px',
-                backgroundColor: '#10b981',
-                borderRadius: '12px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: '24px'
-              }}>
-                <Shield size={32} color="#ffffff" />
-              </div>
-              <h3 style={{
-                fontSize: '24px',
-                fontWeight: 'bold',
-                color: '#ffffff',
-                marginBottom: '16px'
-              }}>Secure & Private</h3>
-              <p style={{
-                color: '#a1a1aa',
-                lineHeight: '1.6'
-              }}>
-                Your code stays secure. We use enterprise-grade security measures to protect your intellectual property.
-              </p>
+            <div style={{ padding: 18, position: 'relative', fontFamily: 'var(--code-font)', minHeight: 160 }}>
+              {/* Highlight pulse line */}
+              <div className="line-pulse" style={{ position: 'absolute', left: 0, right: 0, top: 48, height: 22, background: 'linear-gradient(90deg, rgba(168,85,247,.08), rgba(96,165,250,.08))' }}></div>
+              {/* Code */}
+              <pre style={{ margin: 0, color: '#C5C5C5', whiteSpace: 'pre-wrap' }}>
+{codeSample}
+              </pre>
+              {/* Cursor */}
+              <span className="blink-cursor" style={{ position: 'absolute', width: 8, height: 18, background: '#ffffff', left: 180, bottom: 26, borderRadius: 1 }}></span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* See It In Action Section */}
-      <section style={{
-        padding: '80px 0'
-      }}>
-        <div style={{
-          maxWidth: '1200px',
-          margin: '0 auto',
-          padding: '0 24px'
-        }}>
-          <div style={{ textAlign: 'center', marginBottom: '64px' }}>
-            <h2 style={{
-              fontSize: '36px',
-              fontWeight: 'bold',
-              color: '#ffffff',
-              marginBottom: '16px'
-            }}>See It In Action</h2>
-            <p style={{
-              fontSize: '20px',
-              color: '#a1a1aa'
-            }}>Experience the power of AI-driven code analysis</p>
-          </div>
-          
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
-            gap: '48px',
-            alignItems: 'center'
-          }}>
-            {/* Code Editor */}
-            <div style={{
-              backgroundColor: '#18181b',
-              borderRadius: '12px',
-              border: '1px solid #3f3f46',
-              overflow: 'hidden'
-            }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '12px 16px',
-                backgroundColor: '#27272a',
-                borderBottom: '1px solid #3f3f46'
-              }}>
-                <div style={{ width: '12px', height: '12px', backgroundColor: '#ef4444', borderRadius: '50%' }}></div>
-                <div style={{ width: '12px', height: '12px', backgroundColor: '#f59e0b', borderRadius: '50%' }}></div>
-                <div style={{ width: '12px', height: '12px', backgroundColor: '#10b981', borderRadius: '50%' }}></div>
-                <span style={{ color: '#a1a1aa', marginLeft: '16px', fontSize: '14px', fontFamily: 'monospace' }}>example.js</span>
-              </div>
-              <div style={{ padding: '24px' }}>
-                <pre style={{
-                  color: '#a1a1aa',
-                  fontSize: '14px',
-                  fontFamily: 'Monaco, Consolas, "Courier New", monospace',
-                  lineHeight: '1.6',
-                  margin: 0,
-                  whiteSpace: 'pre-wrap'
-                }}>
-{`function calculateTotal(items) {
-  let total = 0;
-  for (let i = 0; i < items.length; i++) {
-    total += items[i].price;
-  }
-  return total;
-}`}
-                </pre>
-              </div>
-            </div>
-            
-            {/* AI Review Panel */}
-            <div style={{
-              backgroundColor: '#27272a',
-              borderRadius: '12px',
-              border: '1px solid #3f3f46',
-              padding: '24px'
-            }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                marginBottom: '24px'
-              }}>
-                <BrainCircuit size={20} color='#9333ea' />
-                <span style={{
-                  color: '#ffffff',
-                  fontWeight: '600',
-                  fontSize: '18px'
-                }}>AI Review</span>
-              </div>
-              
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                {/* Quality Rating */}
-                <div style={{
-                  backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                  border: '1px solid #10b981',
-                  borderRadius: '8px',
-                  padding: '16px'
-                }}>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    marginBottom: '8px'
-                  }}>
-                    <CheckCircle size={16} color="#10b981" />
-                    <span style={{
-                      color: '#10b981',
-                      fontWeight: '600'
-                    }}>Quality Rating: Good</span>
-                  </div>
-                  <p style={{
-                    color: '#a1a1aa',
-                    fontSize: '14px',
-                    margin: 0
-                  }}>Function works correctly and is readable.</p>
-                </div>
-                
-                {/* Suggestion */}
-                <div style={{
-                  backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                  border: '1px solid #3b82f6',
-                  borderRadius: '8px',
-                  padding: '16px'
-                }}>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    marginBottom: '8px'
-                  }}>
-                    <Lightbulb size={16} color="#3b82f6" />
-                    <span style={{
-                      color: '#3b82f6',
-                      fontWeight: '600'
-                    }}>Suggestion</span>
-                  </div>
-                  <p style={{
-                    color: '#a1a1aa',
-                    fontSize: '14px',
-                    margin: 0
-                  }}>Consider using reduce() for more functional approach.</p>
-                </div>
-                
-                {/* Performance */}
-                <div style={{
-                  backgroundColor: 'rgba(245, 158, 11, 0.1)',
-                  border: '1px solid #f59e0b',
-                  borderRadius: '8px',
-                  padding: '16px'
-                }}>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    marginBottom: '8px'
-                  }}>
-                    <AlertTriangle size={16} color="#f59e0b" />
-                    <span style={{
-                      color: '#f59e0b',
-                      fontWeight: '600'
-                    }}>Performance</span>
-                  </div>
-                  <p style={{
-                    color: '#a1a1aa',
-                    fontSize: '14px',
-                    margin: 0
-                  }}>Add input validation to prevent errors.</p>
-                </div>
-              </div>
-            </div>
-          </div>
+      {/* How it works */}
+      <section style={{ padding: '40px 0 10px 0' }}>
+        <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 24px' }}>
+          <h2 style={{ fontWeight: 700, marginBottom: 18 }}>How it Works</h2>
+          <ol style={{ color: '#C5C5C5', lineHeight: 1.8, paddingLeft: 18 }}>
+            <li>Paste or write your code in the editor.</li>
+            <li>Click Review to get a structured analysis with quality, suggestions, errors, and improvements.</li>
+            <li>Use Fix for an AI‑generated improved version; Undo Fix to roll back.</li>
+            <li>Chat with Reviewer to ask follow‑ups, alternatives, or get explanations.</li>
+          </ol>
         </div>
       </section>
 
-      {/* Final CTA Section */}
-      <section style={{
-        padding: '80px 0',
-        backgroundColor: 'rgba(147, 51, 234, 0.1)',
-        textAlign: 'center'
-      }}>
-        <div style={{
-          maxWidth: '800px',
-          margin: '0 auto',
-          padding: '0 24px'
-        }}>
-          <h2 style={{
-            fontSize: '36px',
-            fontWeight: 'bold',
-            color: '#ffffff',
-            marginBottom: '24px'
-          }}>Ready to Improve Your Code?</h2>
-          <p style={{
-            fontSize: '20px',
-            color: '#a1a1aa',
-            marginBottom: '32px',
-            lineHeight: '1.6'
-          }}>
-            Join thousands of developers who trust Codeify for their code reviews. 
-            Start writing better code today.
-          </p>
-          <button 
-            onClick={handleExploreClick}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '12px',
-              backgroundColor: '#9333ea',
-              color: '#ffffff',
-              border: 'none',
-              borderRadius: '8px',
-              padding: '20px 40px',
-              fontSize: '20px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              transition: 'all 0.3s ease',
-              transform: 'scale(1)',
-              boxShadow: '0 4px 14px rgba(147, 51, 234, 0.3)'
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.backgroundColor = '#7c3aed';
-              e.target.style.transform = 'scale(1.05)';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.backgroundColor = '#9333ea';
-              e.target.style.transform = 'scale(1)';
-            }}
-          >
-            <Code size={28} />
-            Start Coding Now
-            <ArrowRight size={24} />
-          </button>
+      {/* Features */}
+      <section style={{ padding: '20px 0 70px 0' }}>
+        <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 24px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 18 }}>
+          <div style={{ background: 'rgba(0,0,0,.45)', border: '1px solid rgba(255,255,255,.08)', borderRadius: 12, padding: 18 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+              <NotebookPen size={18} color="#a855f7" />
+              <strong>Note Making</strong>
+            </div>
+            <p style={{ color: '#C5C5C5' }}>Keep quick notes and decisions from each review session for future reference.</p>
+          </div>
+          <div style={{ background: 'rgba(0,0,0,.45)', border: '1px solid rgba(255,255,255,.08)', borderRadius: 12, padding: 18 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+              <CheckCircle2 size={18} color="#60a5fa" />
+              <strong>Code Reviewing</strong>
+            </div>
+            <p style={{ color: '#C5C5C5' }}>Deep, structured reviews with quality rating, step‑by‑step explanation, and concrete issues.</p>
+          </div>
+          <div style={{ background: 'rgba(0,0,0,.45)', border: '1px solid rgba(255,255,255,.08)', borderRadius: 12, padding: 18 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+              <Wrench size={18} color="#34d399" />
+              <strong>Code Fixing</strong>
+            </div>
+            <p style={{ color: '#C5C5C5' }}>One‑click fixes and in‑card Apply Fix buttons to update the code directly.</p>
+          </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer style={{
-        backgroundColor: '#27272a',
-        borderTop: '1px solid #3f3f46',
-        padding: '32px 0',
-        textAlign: 'center'
-      }}>
-        <div style={{
-          maxWidth: '1200px',
-          margin: '0 auto',
-          padding: '0 24px'
-        }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '12px',
-            marginBottom: '16px'
-          }}>
-            <BrainCircuit size={24} color='#9333ea' />
-            <span style={{
-              fontSize: '20px',
-              fontWeight: 'bold',
-              color: '#ffffff'
-            }}>Codeify</span>
+      <footer style={{ padding: '28px 0', borderTop: '1px solid rgba(255,255,255,.06)', background: 'rgba(0,0,0,.35)' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: '#a1a1aa' }}>
+          <span>© {new Date().getFullYear()} Codeify. All rights reserved.</span>
+          <div style={{ display: 'flex', gap: 14 }}>
+            <a href="#" style={{ color: '#a1a1aa', textDecoration: 'none' }}>Privacy</a>
+            <a href="#" style={{ color: '#a1a1aa', textDecoration: 'none' }}>Terms</a>
+            <a href="#" style={{ color: '#a1a1aa', textDecoration: 'none' }}>Contact</a>
           </div>
-          <p style={{
-            color: '#a1a1aa',
-            margin: 0
-          }}>
-            © 2024 Codeify. Empowering developers with AI-powered code analysis.
-          </p>
         </div>
       </footer>
+
+      {/* Inline CSS for animations respecting prefers-reduced-motion */}
+      <style>{`
+        @media (prefers-reduced-motion: no-preference) {
+          .blink-cursor { animation: blink 1.1s steps(2, start) infinite; }
+          .line-pulse { animation: pulse 3.2s ease-in-out infinite; }
+        }
+        @keyframes blink { to { opacity: 0; } }
+        @keyframes pulse { 0%,100% { opacity: .25 } 50% { opacity: .55 } }
+      `}</style>
     </div>
   );
 };
