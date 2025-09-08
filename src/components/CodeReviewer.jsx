@@ -2,8 +2,10 @@ import React, { useState, useRef, useEffect } from 'react';
 import Editor from '@monaco-editor/react';
 import Select from 'react-select';
 import { GoogleGenAI } from "@google/genai";
-import { Play, Wrench, BookOpen, Lightbulb, AlertTriangle, List, ArrowDown, Save, ChevronDown, CheckCircle, ExternalLink, Zap, Shield, BarChart3, Code2, TrendingUp, Clock, Star } from 'lucide-react';
-import RingLoader from "react-spinners/RingLoader";
+import { Play, Wrench, Save, ChevronDown } from 'lucide-react';
+import FeedbackCards from './FeedbackCards';
+import ChatFooter from './ChatFooter';
+import HashLoader from "react-spinners/HashLoader";
 
 const CodeReviewer = () => {
   const options = [
@@ -42,17 +44,11 @@ const CodeReviewer = () => {
     suggestions: false, 
     explanation: false, 
     errors: false, 
-    improvements: false,
-    performance: false,
-    security: false,
-    metrics: false
+    improvements: false
   });
 
   // Additional state for new features
-  const [showOpenEditor, setShowOpenEditor] = useState(false);
-  const [performanceData, setPerformanceData] = useState(null);
-  const [securityData, setSecurityData] = useState(null);
-  const [metricsData, setMetricsData] = useState(null);
+  
 
   // History
   const [history, setHistory] = useState([]);
@@ -139,9 +135,6 @@ const CodeReviewer = () => {
     setResponse("");
     setLoading(true);
     setReviewData(null);
-    setPerformanceData(null);
-    setSecurityData(null);
-    setMetricsData(null);
     
     const response = await ai.models.generateContent({
       model: "gemini-2.0-flash",
@@ -170,11 +163,6 @@ Code: ${code}
         setReviewData(parsedData);
         setHistory((h) => [{ timestamp: new Date().toISOString(), data: parsedData, codeSnapshot: code }, ...h]);
         setSelectedHistoryIndex(0);
-        
-        // Trigger additional analyses
-        analyzePerformance();
-        analyzeSecurity();
-        analyzeMetrics();
       } else {
         setResponse(response.text);
       }
@@ -184,83 +172,6 @@ Code: ${code}
     
     setLoading(false);
     showToast('Code reviewed ✅');
-  }
-
-  async function analyzePerformance() {
-    try {
-      const response = await ai.models.generateContent({
-        model: "gemini-2.0-flash",
-        contents: `Analyze the performance aspects of this ${selectedOption.value} code and provide a JSON response:
-
-{
-  "performanceRating": "Excellent|Good|Average|Poor",
-  "bottlenecks": ["bottleneck1", "bottleneck2"],
-  "optimizations": ["optimization1", "optimization2"],
-  "complexity": "O(n) analysis or complexity description",
-  "memoryUsage": "memory usage analysis"
-}
-
-Code: ${code}`
-      });
-      
-      const jsonMatch = response.text.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        setPerformanceData(JSON.parse(jsonMatch[0]));
-      }
-    } catch (error) {
-      console.error('Performance analysis failed:', error);
-    }
-  }
-
-  async function analyzeSecurity() {
-    try {
-      const response = await ai.models.generateContent({
-        model: "gemini-2.0-flash",
-        contents: `Analyze the security aspects of this ${selectedOption.value} code and provide a JSON response:
-
-{
-  "securityRating": "Secure|Moderate|Vulnerable",
-  "vulnerabilities": ["vulnerability1", "vulnerability2"] or "No security issues found",
-  "recommendations": ["recommendation1", "recommendation2"],
-  "bestPractices": ["practice1", "practice2"]
-}
-
-Code: ${code}`
-      });
-      
-      const jsonMatch = response.text.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        setSecurityData(JSON.parse(jsonMatch[0]));
-      }
-    } catch (error) {
-      console.error('Security analysis failed:', error);
-    }
-  }
-
-  async function analyzeMetrics() {
-    try {
-      const response = await ai.models.generateContent({
-        model: "gemini-2.0-flash",
-        contents: `Analyze code metrics for this ${selectedOption.value} code and provide a JSON response:
-
-{
-  "linesOfCode": "estimated LOC",
-  "cyclomaticComplexity": "complexity rating",
-  "maintainability": "maintainability score",
-  "readability": "readability assessment",
-  "testability": "testability rating"
-}
-
-Code: ${code}`
-      });
-      
-      const jsonMatch = response.text.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        setMetricsData(JSON.parse(jsonMatch[0]));
-      }
-    } catch (error) {
-      console.error('Metrics analysis failed:', error);
-    }
   }
 
   async function fixCode() {
@@ -283,7 +194,10 @@ ${code}
 Improved code:`,
     });
     
-    setCode(response.text.trim());
+    // Prefer fenced code block contents if present; otherwise use raw text
+    const fixedBlocks = extractCodeBlocks(response.text);
+    const improved = fixedBlocks && fixedBlocks.length ? fixedBlocks[0] : response.text.trim();
+    setCode(improved);
     setFixing(false);
     showToast('Fix applied 🔧');
   }
@@ -426,12 +340,7 @@ Improved code:`,
     showToast('Applied fix to editor ✅');
   }
 
-  function openExternalEditor() {
-    const blob = new Blob([code], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    window.open(url, '_blank');
-    showToast('Opened in new tab 📝');
-  }
+  
 
   const handleEditorDidMount = (editor, monaco) => {
     editorRef.current = editor;
@@ -677,35 +586,6 @@ Improved code:`,
             </div>
 
             <div className="flex items-center gap-3">
-              <button
-                onClick={openExternalEditor}
-                style={{
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  padding: '8px 12px',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  transition: 'all 0.3s ease',
-                  boxShadow: '0 2px 8px rgba(102, 126, 234, 0.3)'
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.transform = 'translateY(-2px) scale(1.05)';
-                  e.target.style.boxShadow = '0 4px 16px rgba(102, 126, 234, 0.4)';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.transform = 'translateY(0) scale(1)';
-                  e.target.style.boxShadow = '0 2px 8px rgba(102, 126, 234, 0.3)';
-                }}
-              >
-                <ExternalLink size={16} />
-                Open Editor
-              </button>
               <div className="flex items-center" style={{ border: `1px solid ${palette.divider}`, borderRadius: '8px', overflow: 'hidden' }}>
                 <select
                   value={selectedHistoryIndex ?? ''}
@@ -785,8 +665,8 @@ Improved code:`,
             boxShadow: '0 4px 12px rgba(0,0,0,0.25)'
           }}
         >
-          <div className="p-4" style={{ borderBottom: `1px solid ${palette.divider}` }}>
-            <span style={{ color: palette.textPrimary, fontWeight: 600 }}>Code</span>
+          <div className="p-4" style={{ borderBottom: 'none' }}>
+            <span style={{ color: palette.textPrimary, fontWeight: 600, marginLeft: 12 }}>Reviewer</span>
           </div>
 
           {/* Toast */}
@@ -796,490 +676,23 @@ Improved code:`,
             </div>
           )}
 
-          <div className="flex-1 overflow-y-auto p-4" style={{ background: '#242424' }}>
+          <div className="flex-1 overflow-y-auto p-4" style={{ background: '#000000', marginLeft: 12, marginBottom: 12 }}>
             {loading && (
-              <div className="flex justify-center items-center h-32">
-                <RingLoader color='#9333ea' size={50} />
+              <div className="flex justify-center items-center" style={{ height: 260 }}>
+                <HashLoader color="#8b5cf6" size={90} />
               </div>
             )}
 
             {reviewData && !loading && (
-              <div className="space-y-8">
-                <div 
-                  className="rounded-xl p-4 shadow-md" 
-                  style={{ 
-                    background: palette.cardGradient, 
-                    border: `1px solid ${palette.divider}`, 
-                    fontFamily: 'var(--ui-font)',
-                    transition: 'all 0.3s ease',
-                    cursor: 'pointer'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                    e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.3)';
-                    e.currentTarget.style.borderColor = palette.run;
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
-                    e.currentTarget.style.borderColor = palette.divider;
-                  }}
-                  onClick={() => toggleCard('quality')}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#2B2B2B' }}>
-                        <CheckCircle size={16} color={palette.run} />
-                      </div>
-                      <h3 className="font-semibold" style={{ color: palette.textPrimary, fontFamily: 'var(--ui-font)', fontWeight: 600, marginLeft: 8 }}>Quality Rating</h3>
-                    </div>
-                    <ChevronDown 
-                      size={16} 
-                      color={palette.textMuted} 
-                      style={{ 
-                        transform: collapsed.quality ? 'rotate(-90deg)' : 'rotate(0deg)',
-                        transition: 'transform 0.2s ease'
-                      }} 
-                    />
-                  </div>
-                  {!collapsed.quality && (
-                    <p className="font-medium text-sm" style={{ color: palette.run, fontFamily: 'var(--ui-font)', fontWeight: 600, marginLeft: 8 }}>{reviewData.qualityRating}</p>
-                  )}
-                </div>
-
-                <div 
-                  className="rounded-xl p-4 shadow-md" 
-                  style={{ 
-                    background: palette.cardGradient, 
-                    border: `1px solid ${palette.divider}`, 
-                    fontFamily: 'var(--ui-font)',
-                    transition: 'all 0.3s ease',
-                    cursor: 'pointer'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                    e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.3)';
-                    e.currentTarget.style.borderColor = palette.bulb;
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
-                    e.currentTarget.style.borderColor = palette.divider;
-                  }}
-                  onClick={() => toggleCard('suggestions')}
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#2B2B2B' }}>
-                        <Lightbulb size={16} color={palette.bulb} />
-                      </div>
-                      <h3 className="font-semibold" style={{ color: palette.textPrimary, fontFamily: 'var(--ui-font)', fontWeight: 600, marginLeft: 8 }}>Suggestions</h3>
-                    </div>
-                    <ChevronDown 
-                      size={16} 
-                      color={palette.textMuted} 
-                      style={{ 
-                        transform: collapsed.suggestions ? 'rotate(-90deg)' : 'rotate(0deg)',
-                        transition: 'transform 0.2s ease'
-                      }} 
-                    />
-                  </div>
-                  {!collapsed.suggestions && (
-                    <ul className="space-y-3">
-                      {reviewData.suggestions?.map((suggestion, index) => {
-                        const blocks = extractCodeBlocks(suggestion);
-                        return (
-                          <li key={index} className="text-sm" style={{ color: palette.textSecondary, fontFamily: 'var(--ui-font)', fontWeight: 600, marginLeft: 8 }}>
-                            <div className="mb-2">• {suggestion.replace(/```[\s\S]*?```/g, '').trim()}</div>
-                            {blocks.map((b, bi) => (
-                              <div key={bi} className="rounded-md" style={{ background: '#1f1f1f', border: `1px solid ${palette.divider}` }}>
-                                <div className="flex items-center justify-between px-3 py-2" style={{ borderBottom: `1px solid ${palette.divider}` }}>
-                                  <span className="text-xs" style={{ color: palette.textMuted }}>Suggested code</span>
-                                  <div className="flex items-center gap-2">
-                                    <button className="text-xs px-2 py-1 rounded-md" style={{ background: '#333', color: '#fff', fontFamily: 'var(--ui-font)' }} onClick={() => copyToClipboard(b)}>Copy</button>
-                                    <button className="text-xs px-2 py-1 rounded-md" style={{ background: palette.fix, color: '#fff', fontFamily: 'var(--ui-font)' }} onClick={() => applyFixBlock(b)}>Apply Fix</button>
-                                  </div>
-                                </div>
-                                <pre className="p-3 text-xs overflow-auto" style={{ color: palette.textSecondary, margin: 0, fontFamily: 'var(--code-font)', fontWeight: 600 }}><code>{b}</code></pre>
-                              </div>
-                            ))}
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  )}
-                </div>
-
-                <div 
-                  className="rounded-xl p-4 shadow-md" 
-                  style={{ 
-                    background: palette.cardGradient, 
-                    border: `1px solid ${palette.divider}`, 
-                    fontFamily: 'var(--ui-font)',
-                    transition: 'all 0.3s ease',
-                    cursor: 'pointer'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                    e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.3)';
-                    e.currentTarget.style.borderColor = '#4A90E2';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
-                    e.currentTarget.style.borderColor = palette.divider;
-                  }}
-                  onClick={() => toggleCard('explanation')}
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#2B2B2B' }}>
-                        <BookOpen size={16} color={'#4A90E2'} />
-                      </div>
-                      <h3 className="font-semibold" style={{ color: palette.textPrimary, fontFamily: 'var(--ui-font)', fontWeight: 600, marginLeft: 8 }}>Step-by-Step Explanation</h3>
-                    </div>
-                    <ChevronDown 
-                      size={16} 
-                      color={palette.textMuted} 
-                      style={{ 
-                        transform: collapsed.explanation ? 'rotate(-90deg)' : 'rotate(0deg)',
-                        transition: 'transform 0.2s ease'
-                      }} 
-                    />
-                  </div>
-                  {!collapsed.explanation && (
-                    <p className="text-sm" style={{ color: palette.textSecondary, fontFamily: 'var(--ui-font)', fontWeight: 600, marginLeft: 8 }}>
-                      {reviewData.explanation}
-                    </p>
-                  )}
-                </div>
-
-                <div 
-                  className="rounded-xl p-4 shadow-md" 
-                  style={{ 
-                    background: palette.cardGradient, 
-                    border: `1px solid ${palette.divider}`, 
-                    fontFamily: 'var(--ui-font)',
-                    transition: 'all 0.3s ease',
-                    cursor: 'pointer'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                    e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.3)';
-                    e.currentTarget.style.borderColor = palette.error;
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
-                    e.currentTarget.style.borderColor = palette.divider;
-                  }}
-                  onClick={() => toggleCard('errors')}
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#2B2B2B' }}>
-                        <AlertTriangle size={16} color={palette.error} />
-                      </div>
-                      <h3 className="font-semibold" style={{ color: palette.textPrimary, fontFamily: 'var(--ui-font)', fontWeight: 600, marginLeft: 8 }}>Errors</h3>
-                    </div>
-                    <ChevronDown 
-                      size={16} 
-                      color={palette.textMuted} 
-                      style={{ 
-                        transform: collapsed.errors ? 'rotate(-90deg)' : 'rotate(0deg)',
-                        transition: 'transform 0.2s ease'
-                      }} 
-                    />
-                  </div>
-                  {!collapsed.errors && (
-                    Array.isArray(reviewData.errors) ? (
-                      <ul className="space-y-2">
-                        {reviewData.errors.map((error, index) => (
-                          <li key={index} className="text-sm" style={{ color: palette.textSecondary, fontFamily: 'var(--ui-font)', fontWeight: 600, marginLeft: 8 }}>• {error}</li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="text-sm" style={{ color: palette.textSecondary, fontFamily: 'var(--ui-font)', fontWeight: 600, marginLeft: 8 }}>{reviewData.errors}</p>
-                    )
-                  )}
-                </div>
-
-                {reviewData.improvements && (
-                  <div 
-                    className="rounded-xl p-4 shadow-md" 
-                    style={{ 
-                      background: palette.cardGradient, 
-                      border: `1px solid ${palette.divider}`, 
-                      fontFamily: 'var(--ui-font)',
-                      transition: 'all 0.3s ease',
-                      cursor: 'pointer'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = 'translateY(-2px)';
-                      e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.3)';
-                      e.currentTarget.style.borderColor = '#2ECC71';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = 'translateY(0)';
-                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
-                      e.currentTarget.style.borderColor = palette.divider;
-                    }}
-                    onClick={() => toggleCard('improvements')}
-                  >
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#2B2B2B' }}>
-                          <List size={16} color={'#2ECC71'} />
-                        </div>
-                        <h3 className="font-semibold" style={{ color: palette.textPrimary, fontFamily: 'var(--ui-font)', fontWeight: 600, marginLeft: 8 }}>Improvements</h3>
-                      </div>
-                      <ChevronDown 
-                        size={16} 
-                        color={palette.textMuted} 
-                        style={{ 
-                          transform: collapsed.improvements ? 'rotate(-90deg)' : 'rotate(0deg)',
-                          transition: 'transform 0.2s ease'
-                        }} 
-                      />
-                    </div>
-                    {!collapsed.improvements && (
-                      <ul className="space-y-2">
-                        {reviewData.improvements.map((improvement, index) => (
-                          <li key={index} className="text-sm" style={{ color: palette.textSecondary, fontFamily: 'var(--ui-font)', fontWeight: 600, marginLeft: 8 }}>• {improvement}</li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                )}
-
-                {/* Performance Analysis Section */}
-                {performanceData && (
-                  <div 
-                    className="rounded-xl p-4 shadow-md" 
-                    style={{ 
-                      background: palette.cardGradient, 
-                      border: `1px solid ${palette.divider}`, 
-                      fontFamily: 'var(--ui-font)',
-                      transition: 'all 0.3s ease',
-                      cursor: 'pointer'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = 'translateY(-2px)';
-                      e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.3)';
-                      e.currentTarget.style.borderColor = palette.performance;
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = 'translateY(0)';
-                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
-                      e.currentTarget.style.borderColor = palette.divider;
-                    }}
-                    onClick={() => toggleCard('performance')}
-                  >
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#2B2B2B' }}>
-                          <Zap size={16} color={palette.performance} />
-                        </div>
-                        <h3 className="font-semibold" style={{ color: palette.textPrimary, fontFamily: 'var(--ui-font)', fontWeight: 600, marginLeft: 8 }}>Performance Analysis</h3>
-                      </div>
-                      <ChevronDown 
-                        size={16} 
-                        color={palette.textMuted} 
-                        style={{ 
-                          transform: collapsed.performance ? 'rotate(-90deg)' : 'rotate(0deg)',
-                          transition: 'transform 0.2s ease'
-                        }} 
-                      />
-                    </div>
-                    {!collapsed.performance && (
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-2">
-                          <Star size={14} color={palette.performance} />
-                          <span className="text-sm font-medium" style={{ color: palette.performance }}>{performanceData.performanceRating}</span>
-                        </div>
-                        {performanceData.bottlenecks && performanceData.bottlenecks.length > 0 && (
-                          <div>
-                            <h4 className="text-sm font-medium mb-2" style={{ color: palette.textPrimary }}>Bottlenecks:</h4>
-                            <ul className="space-y-1">
-                              {performanceData.bottlenecks.map((bottleneck, index) => (
-                                <li key={index} className="text-sm" style={{ color: palette.textSecondary }}>• {bottleneck}</li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                        {performanceData.optimizations && performanceData.optimizations.length > 0 && (
-                          <div>
-                            <h4 className="text-sm font-medium mb-2" style={{ color: palette.textPrimary }}>Optimizations:</h4>
-                            <ul className="space-y-1">
-                              {performanceData.optimizations.map((optimization, index) => (
-                                <li key={index} className="text-sm" style={{ color: palette.textSecondary }}>• {optimization}</li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                        {performanceData.complexity && (
-                          <div>
-                            <h4 className="text-sm font-medium mb-1" style={{ color: palette.textPrimary }}>Complexity:</h4>
-                            <p className="text-sm" style={{ color: palette.textSecondary }}>{performanceData.complexity}</p>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Security Analysis Section */}
-                {securityData && (
-                  <div 
-                    className="rounded-xl p-4 shadow-md" 
-                    style={{ 
-                      background: palette.cardGradient, 
-                      border: `1px solid ${palette.divider}`, 
-                      fontFamily: 'var(--ui-font)',
-                      transition: 'all 0.3s ease',
-                      cursor: 'pointer'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = 'translateY(-2px)';
-                      e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.3)';
-                      e.currentTarget.style.borderColor = palette.security;
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = 'translateY(0)';
-                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
-                      e.currentTarget.style.borderColor = palette.divider;
-                    }}
-                    onClick={() => toggleCard('security')}
-                  >
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#2B2B2B' }}>
-                          <Shield size={16} color={palette.security} />
-                        </div>
-                        <h3 className="font-semibold" style={{ color: palette.textPrimary, fontFamily: 'var(--ui-font)', fontWeight: 600, marginLeft: 8 }}>Security Analysis</h3>
-                      </div>
-                      <ChevronDown 
-                        size={16} 
-                        color={palette.textMuted} 
-                        style={{ 
-                          transform: collapsed.security ? 'rotate(-90deg)' : 'rotate(0deg)',
-                          transition: 'transform 0.2s ease'
-                        }} 
-                      />
-                    </div>
-                    {!collapsed.security && (
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-2">
-                          <Shield size={14} color={palette.security} />
-                          <span className="text-sm font-medium" style={{ color: palette.security }}>{securityData.securityRating}</span>
-                        </div>
-                        {securityData.vulnerabilities && Array.isArray(securityData.vulnerabilities) && securityData.vulnerabilities.length > 0 && (
-                          <div>
-                            <h4 className="text-sm font-medium mb-2" style={{ color: palette.textPrimary }}>Vulnerabilities:</h4>
-                            <ul className="space-y-1">
-                              {securityData.vulnerabilities.map((vulnerability, index) => (
-                                <li key={index} className="text-sm" style={{ color: palette.textSecondary }}>• {vulnerability}</li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                        {securityData.recommendations && securityData.recommendations.length > 0 && (
-                          <div>
-                            <h4 className="text-sm font-medium mb-2" style={{ color: palette.textPrimary }}>Recommendations:</h4>
-                            <ul className="space-y-1">
-                              {securityData.recommendations.map((recommendation, index) => (
-                                <li key={index} className="text-sm" style={{ color: palette.textSecondary }}>• {recommendation}</li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Code Metrics Section */}
-                {metricsData && (
-                  <div 
-                    className="rounded-xl p-4 shadow-md" 
-                    style={{ 
-                      background: palette.cardGradient, 
-                      border: `1px solid ${palette.divider}`, 
-                      fontFamily: 'var(--ui-font)',
-                      transition: 'all 0.3s ease',
-                      cursor: 'pointer'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = 'translateY(-2px)';
-                      e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.3)';
-                      e.currentTarget.style.borderColor = palette.metrics;
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = 'translateY(0)';
-                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
-                      e.currentTarget.style.borderColor = palette.divider;
-                    }}
-                    onClick={() => toggleCard('metrics')}
-                  >
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#2B2B2B' }}>
-                          <BarChart3 size={16} color={palette.metrics} />
-                        </div>
-                        <h3 className="font-semibold" style={{ color: palette.textPrimary, fontFamily: 'var(--ui-font)', fontWeight: 600, marginLeft: 8 }}>Code Metrics</h3>
-                      </div>
-                      <ChevronDown 
-                        size={16} 
-                        color={palette.textMuted} 
-                        style={{ 
-                          transform: collapsed.metrics ? 'rotate(-90deg)' : 'rotate(0deg)',
-                          transition: 'transform 0.2s ease'
-                        }} 
-                      />
-                    </div>
-                    {!collapsed.metrics && (
-                      <div className="grid grid-cols-2 gap-4">
-                        {metricsData.linesOfCode && (
-                          <div className="flex items-center gap-2">
-                            <Code2 size={14} color={palette.metrics} />
-                            <div>
-                              <p className="text-xs" style={{ color: palette.textMuted }}>Lines of Code</p>
-                              <p className="text-sm font-medium" style={{ color: palette.textPrimary }}>{metricsData.linesOfCode}</p>
-                            </div>
-                          </div>
-                        )}
-                        {metricsData.cyclomaticComplexity && (
-                          <div className="flex items-center gap-2">
-                            <TrendingUp size={14} color={palette.metrics} />
-                            <div>
-                              <p className="text-xs" style={{ color: palette.textMuted }}>Complexity</p>
-                              <p className="text-sm font-medium" style={{ color: palette.textPrimary }}>{metricsData.cyclomaticComplexity}</p>
-                            </div>
-                          </div>
-                        )}
-                        {metricsData.maintainability && (
-                          <div className="flex items-center gap-2">
-                            <Wrench size={14} color={palette.metrics} />
-                            <div>
-                              <p className="text-xs" style={{ color: palette.textMuted }}>Maintainability</p>
-                              <p className="text-sm font-medium" style={{ color: palette.textPrimary }}>{metricsData.maintainability}</p>
-                            </div>
-                          </div>
-                        )}
-                        {metricsData.readability && (
-                          <div className="flex items-center gap-2">
-                            <BookOpen size={14} color={palette.metrics} />
-                            <div>
-                              <p className="text-xs" style={{ color: palette.textMuted }}>Readability</p>
-                              <p className="text-sm font-medium" style={{ color: palette.textPrimary }}>{metricsData.readability}</p>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
+              <FeedbackCards
+                reviewData={reviewData}
+                collapsed={collapsed}
+                toggleCard={toggleCard}
+                palette={palette}
+                extractCodeBlocks={extractCodeBlocks}
+                copyToClipboard={copyToClipboard}
+                applyFixBlock={applyFixBlock}
+              />
             )}
 
             {response && !reviewData && !loading && (
@@ -1291,91 +704,17 @@ Improved code:`,
                 <p style={{ color: palette.textMuted }}>Click "Review" to analyze your code</p>
               </div>
             )}
-
-            {/* Chat with Reviewer */}
-            <div 
-              className="rounded-xl p-4 shadow-md mt-6" 
-              style={{ 
-                background: palette.cardGradient, 
-                border: `1px solid ${palette.divider}`, 
-                fontFamily: 'var(--ui-font)',
-                transition: 'all 0.3s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.3)';
-                e.currentTarget.style.borderColor = palette.fix;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
-                e.currentTarget.style.borderColor = palette.divider;
-              }}
-            >
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-semibold" style={{ color: palette.textPrimary }}>Chat with Reviewer</h3>
-              </div>
-              <div className="flex flex-col gap-3 max-h-60 overflow-y-auto" style={{ background: '#202020', border: `1px solid ${palette.divider}`, borderRadius: 8, padding: 12 }}>
-                {chatMessages.length === 0 && (
-                  <span style={{ color: palette.textMuted, fontSize: 12 }}>Ask follow-ups about the review, performance, patterns, or alternatives.</span>
-                )}
-                {chatMessages.map((m, i) => (
-                  <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
-                    <span style={{ color: '#9ca3af', fontSize: 12, minWidth: 56 }}>{m.role === 'user' ? 'You' : 'Codie'}</span>
-                    <p style={{ color: palette.textSecondary, whiteSpace: 'pre-wrap', margin: 0 }}>{m.content}</p>
-                  </div>
-                ))}
-              </div>
-              <div className="flex items-center gap-2 mt-3">
-                <input
-                  value={chatInput}
-                  onChange={(e) => setChatInput(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === 'Enter') sendChatMessage(); }}
-                  placeholder="Ask a follow-up (e.g., Can you optimize this?)"
-                  style={{ 
-                    flex: 1, 
-                    background: '#1f1f1f', 
-                    color: palette.textPrimary, 
-                    border: `1px solid ${palette.divider}`, 
-                    borderRadius: 8, 
-                    padding: '10px 12px', 
-                    outline: 'none',
-                    transition: 'all 0.2s ease'
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = palette.fix;
-                    e.target.style.boxShadow = `0 0 0 2px ${palette.fix}20`;
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = palette.divider;
-                    e.target.style.boxShadow = 'none';
-                  }}
-                />
-                <button 
-                  onClick={sendChatMessage} 
-                  className="px-3 py-2 rounded-md" 
-                  style={{ 
-                    background: palette.fix, 
-                    color: '#fff',
-                    border: 'none',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    fontWeight: '500'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.background = palette.fixHover;
-                    e.target.style.transform = 'translateY(-1px)';
-                    e.target.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.background = palette.fix;
-                    e.target.style.transform = 'translateY(0)';
-                    e.target.style.boxShadow = 'none';
-                  }}
-                >Send</button>
-              </div>
-            </div>
           </div>
+          {/* Chat footer - visible after review, fixed at bottom area */}
+          {reviewData && (
+            <ChatFooter
+              palette={palette}
+              chatMessages={chatMessages}
+              chatInput={chatInput}
+              setChatInput={setChatInput}
+              sendChatMessage={sendChatMessage}
+            />
+          )}
         </div>
       </div>
     </div>
