@@ -127,7 +127,7 @@ const CodeReviewer = () => {
     }),
   };
 
-  const ai = new GoogleGenAI({ apiKey: "AIzaSyBnHKFSlJ4ODaT9M4NTa6SumYCZzE3ZcS8"}); 
+  const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GOOGLE_API_KEY }); 
 
   async function reviewCode() {
     setResponse("");
