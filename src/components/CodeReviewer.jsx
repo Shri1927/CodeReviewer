@@ -2,9 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import Editor from '@monaco-editor/react';
 import Select from 'react-select';
 import { GoogleGenAI } from "@google/genai";
-import { Play, Wrench, Save, ChevronDown } from 'lucide-react';
-import FeedbackCards from './FeedbackCards';
-import ChatFooter from './ChatFooter';
+import { Play, Wrench, BookOpen, Lightbulb, AlertTriangle, List, Save, ChevronDown, CheckCircle, Send } from 'lucide-react';
 import HashLoader from "react-spinners/HashLoader";
 
 const CodeReviewer = () => {
@@ -684,15 +682,205 @@ Improved code:`,
             )}
 
             {reviewData && !loading && (
-              <FeedbackCards
-                reviewData={reviewData}
-                collapsed={collapsed}
-                toggleCard={toggleCard}
-                palette={palette}
-                extractCodeBlocks={extractCodeBlocks}
-                copyToClipboard={copyToClipboard}
-                applyFixBlock={applyFixBlock}
-              />
+              <div className="space-y-2">
+                <div 
+                  className="rounded-xl p-4 shadow-md" 
+                  style={{ 
+                    background: '#1b1b1b', 
+                    border: `1px solid ${palette.divider}`, 
+                    fontFamily: 'var(--ui-font)',
+                    marginBottom: 8,
+                    cursor: 'pointer'
+                  }}
+                  onClick={() => toggleCard('quality')}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#2B2B2B' }}>
+                        <CheckCircle size={16} color={palette.run} />
+                      </div>
+                      <h3 className="font-semibold" style={{ color: palette.textPrimary, fontFamily: 'var(--ui-font)', fontWeight: 600, marginLeft: 0 }}>Quality Rating</h3>
+                    </div>
+                    <ChevronDown 
+                      size={16} 
+                      color={palette.textMuted} 
+                      style={{ 
+                        transform: collapsed.quality ? 'rotate(-90deg)' : 'rotate(0deg)',
+                        transition: 'transform 0.2s ease'
+                      }} 
+                    />
+                  </div>
+                  {!collapsed.quality && (
+                    <p className="font-medium text-sm" style={{ color: palette.run, fontFamily: 'var(--ui-font)', fontWeight: 600, marginLeft: 0 }}>{reviewData.qualityRating}</p>
+                  )}
+                </div>
+
+                <div 
+                  className="rounded-xl p-4 shadow-md" 
+                  style={{ 
+                    background: '#1b1b1b', 
+                    border: `1px solid ${palette.divider}`, 
+                    fontFamily: 'var(--ui-font)',
+                    marginBottom: 8,
+                    cursor: 'pointer'
+                  }}
+                  onClick={() => toggleCard('suggestions')}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#2B2B2B' }}>
+                        <Lightbulb size={16} color={palette.bulb} />
+                      </div>
+                      <h3 className="font-semibold" style={{ color: palette.textPrimary, fontFamily: 'var(--ui-font)', fontWeight: 600, marginLeft: 0 }}>Suggestions</h3>
+                    </div>
+                    <ChevronDown 
+                      size={16} 
+                      color={palette.textMuted} 
+                      style={{ 
+                        transform: collapsed.suggestions ? 'rotate(-90deg)' : 'rotate(0deg)',
+                        transition: 'transform 0.2s ease'
+                      }} 
+                    />
+                  </div>
+                  {!collapsed.suggestions && (
+                    <ul className="space-y-3">
+                      {reviewData.suggestions?.map((suggestion, index) => {
+                        const blocks = extractCodeBlocks(suggestion);
+                        return (
+                          <li key={index} className="text-sm" style={{ color: palette.textSecondary, fontFamily: 'var(--ui-font)', fontWeight: 600, marginLeft: 0 }}>
+                            <div className="mb-2">• {suggestion.replace(/```[\s\S]*?```/g, '').trim()}</div>
+                            {blocks.map((b, bi) => (
+                              <div key={bi} className="rounded-md" style={{ background: '#1f1f1f', border: `1px solid ${palette.divider}` }}>
+                                <div className="flex items-center justify-between px-3 py-2" style={{ borderBottom: `1px solid ${palette.divider}` }}>
+                                  <span className="text-xs" style={{ color: palette.textMuted }}>Suggested code</span>
+                                  <div className="flex items-center gap-2">
+                                    <button className="text-xs px-2 py-1 rounded-md" style={{ background: '#333', color: '#fff', fontFamily: 'var(--ui-font)' }} onClick={() => copyToClipboard(b)}>Copy</button>
+                                    <button className="text-xs px-2 py-1 rounded-md" style={{ background: palette.fix, color: '#fff', fontFamily: 'var(--ui-font)' }} onClick={() => applyFixBlock(b)}>Apply Fix</button>
+                                  </div>
+                                </div>
+                                <pre className="p-3 text-xs overflow-auto" style={{ color: palette.textSecondary, margin: 0, fontFamily: 'var(--code-font)', fontWeight: 600 }}><code>{b}</code></pre>
+                              </div>
+                            ))}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                </div>
+
+                <div 
+                  className="rounded-xl p-4 shadow-md" 
+                  style={{ 
+                    background: '#1b1b1b', 
+                    border: `1px solid ${palette.divider}`, 
+                    fontFamily: 'var(--ui-font)',
+                    marginBottom: 8,
+                    cursor: 'pointer'
+                  }}
+                  onClick={() => toggleCard('explanation')}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#2B2B2B' }}>
+                        <BookOpen size={16} color={'#4A90E2'} />
+                      </div>
+                      <h3 className="font-semibold" style={{ color: palette.textPrimary, fontFamily: 'var(--ui-font)', fontWeight: 600, marginLeft: 0 }}>Step-by-Step Explanation</h3>
+                    </div>
+                    <ChevronDown 
+                      size={16} 
+                      color={palette.textMuted} 
+                      style={{ 
+                        transform: collapsed.explanation ? 'rotate(-90deg)' : 'rotate(0deg)',
+                        transition: 'transform 0.2s ease'
+                      }} 
+                    />
+                  </div>
+                  {!collapsed.explanation && (
+                    <p className="text-sm" style={{ color: palette.textSecondary, fontFamily: 'var(--ui-font)', fontWeight: 600, marginLeft: 0 }}>
+                      {reviewData.explanation}
+                    </p>
+                  )}
+                </div>
+
+                <div 
+                  className="rounded-xl p-4 shadow-md" 
+                  style={{ 
+                    background: '#1b1b1b', 
+                    border: `1px solid ${palette.divider}`, 
+                    fontFamily: 'var(--ui-font)',
+                    marginBottom: 8,
+                    cursor: 'pointer'
+                  }}
+                  onClick={() => toggleCard('errors')}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#2B2B2B' }}>
+                        <AlertTriangle size={16} color={palette.error} />
+                      </div>
+                      <h3 className="font-semibold" style={{ color: palette.textPrimary, fontFamily: 'var(--ui-font)', fontWeight: 600, marginLeft: 0 }}>Errors</h3>
+                    </div>
+                    <ChevronDown 
+                      size={16} 
+                      color={palette.textMuted} 
+                      style={{ 
+                        transform: collapsed.errors ? 'rotate(-90deg)' : 'rotate(0deg)',
+                        transition: 'transform 0.2s ease'
+                      }} 
+                    />
+                  </div>
+                  {!collapsed.errors && (
+                    Array.isArray(reviewData.errors) ? (
+                      <ul className="space-y-2">
+                        {reviewData.errors.map((error, index) => (
+                          <li key={index} className="text-sm" style={{ color: palette.textSecondary, fontFamily: 'var(--ui-font)', fontWeight: 600, marginLeft: 0 }}>• {error}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-sm" style={{ color: palette.textSecondary, fontFamily: 'var(--ui-font)', fontWeight: 600, marginLeft: 0 }}>{reviewData.errors}</p>
+                    )
+                  )}
+                </div>
+
+                {reviewData.improvements && (
+                  <div 
+                    className="rounded-xl p-4 shadow-md" 
+                    style={{ 
+                      background: '#1b1b1b', 
+                      border: `1px solid ${palette.divider}`, 
+                      fontFamily: 'var(--ui-font)',
+                      marginBottom: 8,
+                      cursor: 'pointer'
+                    }}
+                    onClick={() => toggleCard('improvements')}
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#2B2B2B' }}>
+                          <List size={16} color={'#2ECC71'} />
+                        </div>
+                        <h3 className="font-semibold" style={{ color: palette.textPrimary, fontFamily: 'var(--ui-font)', fontWeight: 600, marginLeft: 0 }}>Improvements</h3>
+                      </div>
+                      <ChevronDown 
+                        size={16} 
+                        color={palette.textMuted} 
+                        style={{ 
+                          transform: collapsed.improvements ? 'rotate(-90deg)' : 'rotate(0deg)',
+                          transition: 'transform 0.2s ease'
+                        }} 
+                      />
+                    </div>
+                    {!collapsed.improvements && (
+                      <ul className="space-y-2">
+                        {reviewData.improvements.map((improvement, index) => (
+                          <li key={index} className="text-sm" style={{ color: palette.textSecondary, fontFamily: 'var(--ui-font)', fontWeight: 600, marginLeft: 0 }}>• {improvement}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                )}
+
+              </div>
             )}
 
             {response && !reviewData && !loading && (
@@ -707,13 +895,84 @@ Improved code:`,
           </div>
           {/* Chat footer - visible after review, fixed at bottom area */}
           {reviewData && (
-            <ChatFooter
-              palette={palette}
-              chatMessages={chatMessages}
-              chatInput={chatInput}
-              setChatInput={setChatInput}
-              sendChatMessage={sendChatMessage}
-            />
+            <div style={{ borderTop: `1px solid ${palette.divider}`, background: '#1e1e1e', padding: 12 }}>
+              <div 
+                className="rounded-xl p-4 shadow-md" 
+                style={{ 
+                  background: palette.cardGradient, 
+                  border: `1px solid ${palette.divider}`, 
+                  fontFamily: 'var(--ui-font)'
+                }}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-semibold" style={{ color: palette.textPrimary }}>Chat with Reviewer</h3>
+                </div>
+                <div className="flex flex-col gap-3" style={{ background: '#202020', border: `1px solid ${palette.divider}`, borderRadius: 8, padding: 12, maxHeight: 140, overflowY: 'auto' }}>
+                  {chatMessages.map((m, i) => (
+                    <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+                      <span style={{ color: '#9ca3af', fontSize: 12, minWidth: 56 }}>{m.role === 'user' ? 'You' : 'Codie'}</span>
+                      <p style={{ color: palette.textSecondary, whiteSpace: 'pre-wrap', margin: 0 }}>{m.content}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex items-center gap-2 mt-3">
+                  <input
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') sendChatMessage(); }}
+                    placeholder="Ask a follow-up (e.g., Can you optimize this?)"
+                    style={{ 
+                      flex: 1, 
+                      background: '#1f1f1f', 
+                      color: palette.textPrimary, 
+                      border: `1px solid ${palette.divider}`, 
+                      borderRadius: 8, 
+                      padding: '10px 12px', 
+                      outline: 'none',
+                      transition: 'all 0.2s ease'
+                    }}
+                    onFocus={(e) => {
+                      e.target.style.borderColor = palette.fix;
+                      e.target.style.boxShadow = `0 0 0 2px ${palette.fix}20`;
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = palette.divider;
+                      e.target.style.boxShadow = 'none';
+                    }}
+                  />
+                  <button 
+                    onClick={sendChatMessage} 
+                    className="px-3 py-2 rounded-md" 
+                    style={{ 
+                      background: palette.fix, 
+                      color: '#fff',
+                      border: 'none',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: 40,
+                      height: 40,
+                      borderRadius: 8
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.background = palette.fixHover;
+                      e.target.style.transform = 'translateY(-1px)';
+                      e.target.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.background = palette.fix;
+                      e.target.style.transform = 'translateY(0)';
+                      e.target.style.boxShadow = 'none';
+                    }}
+                    title="Send"
+                  >
+                    <Send size={18} />
+                  </button>
+                </div>
+              </div>
+            </div>
           )}
         </div>
       </div>
