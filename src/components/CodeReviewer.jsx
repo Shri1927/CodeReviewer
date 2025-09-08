@@ -127,14 +127,31 @@ const CodeReviewer = () => {
     }),
   };
 
-  const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GOOGLE_API_KEY }); 
+  const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
+  const aiRef = useRef(null);
+  useEffect(() => {
+    try {
+      if (apiKey) {
+        aiRef.current = new GoogleGenAI({ apiKey });
+      } else {
+        aiRef.current = null;
+      }
+    } catch (_) {
+      aiRef.current = null;
+    }
+  }, [apiKey]); 
 
   async function reviewCode() {
     setResponse("");
     setLoading(true);
     setReviewData(null);
     
-    const response = await ai.models.generateContent({
+    if (!aiRef.current) {
+      alert('Missing API key. Please set VITE_GOOGLE_API_KEY in .env');
+      setLoading(false);
+      return;
+    }
+    const response = await aiRef.current.models.generateContent({
       model: "gemini-2.0-flash",
       contents: `You are an expert-level software developer, skilled in writing efficient, clean, and advanced code.
 I'm sharing a piece of code written in ${selectedOption.value}.
@@ -181,7 +198,12 @@ Code: ${code}
     setFixing(true);
     lastFixedRef.current = code;
     
-    const response = await ai.models.generateContent({
+    if (!aiRef.current) {
+      alert('Missing API key. Please set VITE_GOOGLE_API_KEY in .env');
+      setFixing(false);
+      return;
+    }
+    const response = await aiRef.current.models.generateContent({
       model: "gemini-2.0-flash",
       contents: `You are an expert software developer. Please fix and improve the following ${selectedOption.value} code. 
 Return ONLY the improved code without any explanations or markdown formatting.
@@ -285,7 +307,11 @@ Improved code:`,
     setChatInput("");
 
     const reviewJson = reviewData ? JSON.stringify(reviewData) : 'null';
-    const response = await ai.models.generateContent({
+    if (!aiRef.current) {
+      alert('Missing API key. Please set VITE_GOOGLE_API_KEY in .env');
+      return;
+    }
+    const response = await aiRef.current.models.generateContent({
       model: "gemini-2.0-flash",
       contents: `You are Codie, a helpful senior code reviewer. Continue the conversation and answer concisely.\n\nContext:\n- Language: ${selectedOption.value}\n- Current code:\n${code}\n- Last structured review (JSON):\n${reviewJson}\n\nUser question:\n${trimmed}`
     });
