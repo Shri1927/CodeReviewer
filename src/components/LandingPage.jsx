@@ -28,9 +28,13 @@ const LandingPage = () => {
     }}>
       {/* Header */}
       <header style={{
-        background: 'transparent',
+        position: 'sticky',
+        top: 0,
+        zIndex: 20,
+        background: 'rgba(0,0,0,.35)',
+        backdropFilter: 'blur(6px)',
         borderBottom: '1px solid rgba(255,255,255,.06)',
-        padding: '16px 0'
+        padding: '12px 0'
       }}>
         <div style={{
           maxWidth: '1200px',
@@ -44,14 +48,15 @@ const LandingPage = () => {
             <BrainCircuit size={32} color='#9333ea'/>
             <span style={{ fontSize: '24px', fontWeight: 'bold' }}>Codeify</span>
           </div>
-          <button onClick={handleHeaderOpen} className="btn btn-primary" title="Open Editor">
+          <button onClick={handleHeaderOpen} className="btn btn-primary" title="Open Editor" style={{ boxShadow: '0 8px 22px rgba(96,165,250,.25)' }}>
             <Code size={18} /> Open Editor
           </button>
         </div>
       </header>
 
       {/* Hero */}
-      <section style={{ padding: '90px 0 40px 0' }}>
+      <section style={{ padding: '90px 0 40px 0', position: 'relative' }}>
+        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'radial-gradient(40% 50% at 60% 10%, rgba(168,85,247,.18), transparent 60%)' }} />
         <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px', display: 'grid', gridTemplateColumns: '1.1fr .9fr', gap: '32px' }}>
           <div>
             <h1 style={{ fontSize: 'clamp(2.6rem, 5vw, 3.8rem)', lineHeight: 1.15, marginBottom: 16 }}>
@@ -63,6 +68,7 @@ const LandingPage = () => {
                 WebkitTextFillColor: 'transparent'
               }}>Built for Developers</span>
             </h1>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(147,51,234,.14)', border: '1px solid rgba(168,85,247,.25)', color: '#c4b5fd', padding: '6px 10px', borderRadius: 999, fontSize: 12, marginBottom: 12 }}>Fast • Insightful • Actionable</div>
             <p style={{ color: '#C5C5C5', fontSize: 18, maxWidth: 620, marginBottom: 28 }}>Ship better code with instant, high‑quality reviews, rich explanations, and actionable fixes—right when you need them.</p>
             <div style={{ display: 'flex', gap: 12 }}>
               <button onClick={handleExploreClick} className="btn btn-primary" style={{ boxShadow: '0 10px 30px rgba(96,165,250,.25)' }}>
@@ -114,6 +120,9 @@ const LandingPage = () => {
           </ol>
         </div>
       </section>
+
+      {/* Divider */}
+      <div style={{ height: 1, background: 'linear-gradient(90deg, rgba(255,255,255,.04), rgba(255,255,255,.08), rgba(255,255,255,.04))', margin: '10px 0 0 0' }} />
 
       {/* Features */}
       <section style={{ padding: '20px 0 70px 0' }}>
