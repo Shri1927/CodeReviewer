@@ -63,10 +63,10 @@ const CodeReviewer = () => {
   const monacoRef = useRef(null);
 
   const palette = {
-    bgMain: '#1E1E1E',
-    bgPanel: '#2A2A2A',
-    editorPanel: '#252526',
-    divider: '#2D2D2D',
+    bgMain: '#262626',
+    bgPanel: '#2F2F2F',
+    editorPanel: '#2C2C2C',
+    divider: '#3A3A3A',
     textPrimary: '#FFFFFF',
     textSecondary: '#C5C5C5',
     textMuted: '#8A8A8A',
@@ -293,7 +293,11 @@ Improved code:`,
   // Simple toast system
   const [toast, setToast] = useState(null);
   const [chatMessages, setChatMessages] = useState([]);
+  const [chatMode, setChatMode] = useState(false);
   const [chatInput, setChatInput] = useState("");
+  const compactChatRef = useRef(null);
+  const fullChatRef = useRef(null);
+  const [chatCollapsed, setChatCollapsed] = useState(false);
   function showToast(text) {
     setToast(text);
     setTimeout(() => setToast(null), 1800);
@@ -305,6 +309,9 @@ Improved code:`,
     const userMsg = { role: 'user', content: trimmed, ts: Date.now() };
     setChatMessages((m) => [...m, userMsg]);
     setChatInput("");
+    if (!chatMode) {
+      setChatMode(true);
+    }
 
     const reviewJson = reviewData ? JSON.stringify(reviewData) : 'null';
     if (!aiRef.current) {
@@ -319,6 +326,14 @@ Improved code:`,
     const assistantMsg = { role: 'assistant', content: response.text?.trim?.() || 'No response', ts: Date.now() };
     setChatMessages((m) => [...m, assistantMsg]);
   }
+
+  // Auto-scroll follow-up chat to the latest message
+  useEffect(() => {
+    const el = chatMode ? fullChatRef.current : compactChatRef.current;
+    if (el) {
+      el.scrollTop = el.scrollHeight;
+    }
+  }, [chatMessages, chatMode]);
 
   // Resizer handlers
   useEffect(() => {
@@ -383,12 +398,12 @@ Improved code:`,
       colors: {
         'editor.background': palette.bgMain,
         'editor.foreground': palette.textPrimary,
-        'editor.lineHighlightBackground': '#2D2D2D66',
+        'editor.lineHighlightBackground': '#3A3A3A66',
         'editor.lineHighlightBorder': palette.divider,
         'editorCursor.foreground': palette.textPrimary,
         'editorLineNumber.foreground': palette.textMuted,
         'editorLineNumber.activeForeground': palette.textPrimary,
-        'editorGutter.background': '#1B1B1B',
+        'editorGutter.background': '#232323',
         'editor.selectionBackground': '#264F78AA',
         'editorIndentGuide.background': palette.divider,
         'editorBracketMatch.border': '#3C3C3C'
@@ -677,7 +692,7 @@ Improved code:`,
           style={{ width: '6px', cursor: 'col-resize', background: palette.divider, borderRadius: '6px' }}
         />
 
-        {/* Right Panel - Stacked Feedback */}
+        {/* Right Panel - Stacked Feedback or Full Chat */}
         <div
           className="right flex flex-col"
           style={{
@@ -686,11 +701,12 @@ Improved code:`,
             border: `1px solid ${palette.divider}`,
             borderRadius: '12px',
             overflow: 'hidden',
+            minHeight: 0,
             boxShadow: '0 4px 12px rgba(0,0,0,0.25)'
           }}
         >
           <div className="p-4" style={{ borderBottom: 'none' }}>
-            <span style={{ color: palette.textPrimary, fontWeight: 600, marginLeft: 12 }}>Reviewer</span>
+            <span style={{ color: palette.textPrimary, fontWeight: 600, marginLeft: 12 }}>{chatMode ? 'Chat' : 'Reviewer'}</span>
           </div>
 
           {/* Toast */}
@@ -700,15 +716,17 @@ Improved code:`,
             </div>
           )}
 
-          <div className="flex-1 overflow-y-auto p-4" style={{ background: '#000000', marginLeft: 12, marginBottom: 12 }}>
-            {loading && (
-              <div className="flex justify-center items-center" style={{ height: 260 }}>
-                <HashLoader color="#8b5cf6" size={90} />
-              </div>
-            )}
+          {/* Main content area */}
+          {!chatMode && (
+            <div className="flex-1 overflow-y-auto p-4" style={{ background: '#000000', marginLeft: 12, marginBottom: 12 }}>
+              {loading && (
+                <div className="flex justify-center items-center" style={{ height: 260 }}>
+                  <HashLoader color="#8b5cf6" size={90} />
+                </div>
+              )}
 
-            {reviewData && !loading && (
-              <div className="space-y-2">
+              {reviewData && !loading && (
+                <div className="space-y-2">
                 <div 
                   className="rounded-xl p-4 shadow-md" 
                   style={{ 
@@ -906,21 +924,23 @@ Improved code:`,
                   </div>
                 )}
 
-              </div>
-            )}
+                </div>
+              )}
 
-            {response && !reviewData && !loading && (
-              <div className="whitespace-pre-wrap" style={{ color: palette.textSecondary }}>{response}</div>
-            )}
+              {response && !reviewData && !loading && (
+                <div className="whitespace-pre-wrap" style={{ color: palette.textSecondary }}>{response}</div>
+              )}
 
-            {!loading && !response && !reviewData && (
-              <div className="flex items-center justify-center h-32">
-                <p style={{ color: palette.textMuted }}>Click "Review" to analyze your code</p>
-              </div>
-            )}
-          </div>
-          {/* Chat footer - visible after review, fixed at bottom area */}
-          {reviewData && (
+              {!loading && !response && !reviewData && (
+                <div className="flex items-center justify-center h-32">
+                  <p style={{ color: palette.textMuted }}>Click "Review" to analyze your code</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Chat footer - visible under review to send first message */}
+          {!chatMode && reviewData && (
             <div style={{ borderTop: `1px solid ${palette.divider}`, background: '#1e1e1e', padding: 12 }}>
               <div 
                 className="rounded-xl p-4 shadow-md" 
@@ -932,8 +952,16 @@ Improved code:`,
               >
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="font-semibold" style={{ color: palette.textPrimary }}>Chat with Reviewer</h3>
+                  <button
+                    onClick={() => setChatMode(true)}
+                    className="btn btn-ghost"
+                    style={{ padding: '6px 10px', borderRadius: 8 }}
+                    title="Expand chat"
+                  >
+                    Expand
+                  </button>
                 </div>
-                <div className="flex flex-col gap-3" style={{ background: '#202020', border: `1px solid ${palette.divider}`, borderRadius: 8, padding: 12, maxHeight: 140, overflowY: 'auto' }}>
+                <div className="flex flex-col gap-3" ref={compactChatRef} style={{ background: '#202020', border: `1px solid ${palette.divider}`, borderRadius: 8, padding: 12, maxHeight: 'min(40vh, 240px)', overflowY: 'auto', overscrollBehavior: 'contain', scrollbarGutter: 'stable' }}>
                   {chatMessages.map((m, i) => (
                     <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
                       <span style={{ color: '#9ca3af', fontSize: 12, minWidth: 56 }}>{m.role === 'user' ? 'You' : 'Codie'}</span>
@@ -997,6 +1025,101 @@ Improved code:`,
                     <Send size={18} />
                   </button>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* Full-height chat mode */}
+          {chatMode && (
+            <div className="flex-1 p-4 flex flex-col" style={{ background: '#000000', marginLeft: 12, marginBottom: 12, minHeight: 0 }}>
+              <div 
+                className="rounded-xl p-4 shadow-md flex-1 flex flex-col" 
+                style={{ 
+                  background: palette.cardGradient, 
+                  border: `1px solid ${palette.divider}`, 
+                  fontFamily: 'var(--ui-font)',
+                  minHeight: 0
+                }}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-semibold" style={{ color: palette.textPrimary }}>Chat with Reviewer</h3>
+                  <button
+                    onClick={() => { setChatMode(false); setChatCollapsed(false); }}
+                    className="btn btn-ghost"
+                    style={{ padding: '6px 10px', borderRadius: 8 }}
+                    title={'Minimize chat'}
+                  >
+                    Minimize
+                  </button>
+                </div>
+                {!chatCollapsed && (
+                  <>
+                    <div className="flex-1 flex flex-col gap-3" ref={fullChatRef} style={{ background: '#202020', border: `1px solid ${palette.divider}`, borderRadius: 8, padding: 12, overflowY: 'auto', overscrollBehavior: 'contain', scrollbarGutter: 'stable', WebkitOverflowScrolling: 'touch', minHeight: 0 }}>
+                      {chatMessages.map((m, i) => (
+                        <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+                          <span style={{ color: '#9ca3af', fontSize: 12, minWidth: 56 }}>{m.role === 'user' ? 'You' : 'Codie'}</span>
+                          <p style={{ color: palette.textSecondary, whiteSpace: 'pre-wrap', margin: 0 }}>{m.content}</p>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex items-center gap-2 mt-3">
+                      <input
+                        value={chatInput}
+                        onChange={(e) => setChatInput(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter') sendChatMessage(); }}
+                        placeholder="Ask a follow-up (e.g., Can you optimize this?)"
+                        style={{ 
+                          flex: 1, 
+                          background: '#1f1f1f', 
+                          color: palette.textPrimary, 
+                          border: `1px solid ${palette.divider}`, 
+                          borderRadius: 8, 
+                          padding: '10px 12px', 
+                          outline: 'none',
+                          transition: 'all 0.2s ease'
+                        }}
+                        onFocus={(e) => {
+                          e.target.style.borderColor = palette.fix;
+                          e.target.style.boxShadow = `0 0 0 2px ${palette.fix}20`;
+                        }}
+                        onBlur={(e) => {
+                          e.target.style.borderColor = palette.divider;
+                          e.target.style.boxShadow = 'none';
+                        }}
+                      />
+                      <button 
+                        onClick={sendChatMessage} 
+                        className="px-3 py-2 rounded-md" 
+                        style={{ 
+                          background: palette.fix, 
+                          color: '#fff',
+                          border: 'none',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: 40,
+                          height: 40,
+                          borderRadius: 8
+                        }}
+                        onMouseEnter={(e) => {
+                          e.target.style.background = palette.fixHover;
+                          e.target.style.transform = 'translateY(-1px)';
+                          e.target.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.background = palette.fix;
+                          e.target.style.transform = 'translateY(0)';
+                          e.target.style.boxShadow = 'none';
+                        }}
+                        title="Send"
+                      >
+                        <Send size={18} />
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           )}
